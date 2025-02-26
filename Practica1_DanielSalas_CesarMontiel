@@ -1,0 +1,32 @@
+#include <SoftwareSerial.h>
+
+// Definir pines para comunicación con el GPS
+#define RX_PIN 3  // Pin donde se conecta TX del GPS
+#define TX_PIN 4  // Pin donde se conecta RX del GPS
+
+// Crear el objeto SoftwareSerial para el GPS
+SoftwareSerial gpsSerial(RX_PIN, TX_PIN);
+
+String gpsData = ""; // Variable para almacenar la cadena de datos del GPS
+
+void setup() {
+    Serial.begin(9600);    // Comunicación con la PC
+    gpsSerial.begin(9600); // Comunicación con el GPS
+
+    Serial.println("Iniciando GPS..."); // Imprimir texto antes de los datos
+}
+
+void loop() {
+    while (gpsSerial.available()) { // Verificar si hay datos en el buffer del GPS
+        char c = gpsSerial.read();  // Leer un carácter
+        gpsData += c;               // Almacenar el carácter en la cadena
+
+        if (c == '\n') { // Si detecta un salto de línea, procesa la información
+            if (gpsData.startsWith("$GPGGA")) { // Filtrar solo la sentencia $GPGGA
+                Serial.println("Datos GPGGA recibidos:");
+                Serial.println(gpsData); // Imprimir la línea completa de $GPGGA
+            }
+            gpsData = ""; // Reiniciar la cadena para la próxima línea
+        }
+    }
+}
